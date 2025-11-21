@@ -1,73 +1,103 @@
-# React + TypeScript + Vite
+<div align="center">
+  <img src="public/pwa-512x512.png" alt="Private PDF Workstation Logo" width="120" height="120" />
+  
+  # Private PDF Workstation
+  
+  **Secure. Offline. Powerful.**
+  
+  A state-of-the-art, client-side PDF manipulation tool built for privacy and performance.
+  
+  [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+  [![Vite](https://img.shields.io/badge/Vite-6.0-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+  [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+  [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+  [View Demo](https://local-pdf-workstation.vercel.app) · [Report Bug](https://github.com/adhraj12/local-pdf-workstation/issues) · [Request Feature](https://github.com/adhraj12/local-pdf-workstation/issues)
+</div>
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Overview
 
-## React Compiler
+**Private PDF Workstation** is a Progressive Web App (PWA) designed to handle sensitive PDF operations entirely within your browser. Unlike other tools that upload your documents to a remote server, this workstation processes everything locally using WebAssembly and JavaScript libraries.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Your files never leave your device.**
 
-## Expanding the ESLint configuration
+## ✨ Key Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+| Feature | Description |
+|---------|-------------|
+| 🔒 **100% Private** | Local processing ensures your data remains secure and confidential. |
+| ⚡ **Blazing Fast** | Powered by Vite and local computation for instant feedback. |
+| 📄 **Merge PDFs** | Drag-and-drop interface to combine and reorder multiple PDF files. |
+| ✂️ **Split PDFs** | Extract specific pages or ranges with precision. |
+| ✍️ **Sign Documents** | Draw and place signatures directly onto your PDFs. |
+| 📦 **Compress** | Optimize file sizes locally without quality loss. |
+| 📱 **PWA Ready** | Installable on desktop and mobile for offline access. |
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🛠️ Tech Stack
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- **Framework:** React 19 + Vite
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS + Framer Motion
+- **PDF Processing:** pdf-lib + react-pdf
+- **Drag & Drop:** @dnd-kit + react-dropzone
+- **Icons:** Lucide React
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 🏁 Getting Started
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Prerequisites
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- Node.js (v18 or higher)
+- npm or yarn
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/adhraj12/local-pdf-workstation.git
+   cd local-pdf-workstation
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+4. **Build for production**
+   ```bash
+   npm run build
+   ```
+
+## 📱 Offline Usage (PWA)
+
+This application is configured as a Progressive Web App.
+1. Open the app in Chrome/Edge/Safari.
+2. Click the "Install" icon in the address bar.
+3. Launch from your desktop or home screen—even without internet!
+
+## 🤝 Contributing
+
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+<div align="center">
+  Made with ❤️ by <a href="https://github.com/adhraj12">Adhiraj</a>
+</div>
