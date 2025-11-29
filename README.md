@@ -35,6 +35,15 @@
 | ✍️ **Sign Documents** | Draw and place signatures directly onto your PDFs. |
 | 📦 **Compress** | Optimize file sizes locally without quality loss. |
 | 📱 **PWA Ready** | Installable on desktop and mobile for offline access. |
+| 🔄 **Rotate** | Rotate pages 90, 180, or 270 degrees. |
+| 📑 **Organize** | Reorder and delete pages with drag-and-drop. |
+| 💧 **Watermark** | Add custom text watermarks with control over opacity and position. |
+| 🔢 **Page Numbers** | Add page numbers to your documents. |
+| 🛡️ **Protect** | Encrypt PDFs with password protection (AES-256). |
+| 🔓 **Unlock** | Decrypt password-protected PDFs. |
+| 🖼️ **JPG to PDF** | Convert multiple images into a single PDF document. |
+| 📷 **Scan to PDF** | Use your camera to scan documents directly to PDF. |
+| ✏️ **Edit PDF** | Add text and images to existing PDF pages. |
 
 ## 🛠️ Tech Stack
 

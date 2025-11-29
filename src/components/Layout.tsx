@@ -1,5 +1,22 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { FileStack, Scissors, PenLine, Minimize2, ShieldCheck, Menu, X } from 'lucide-react';
+import {
+    FileStack,
+    Scissors,
+    PenLine,
+    Minimize2,
+    ShieldCheck,
+    Menu,
+    X,
+    RotateCw,
+    LayoutGrid,
+    Lock,
+    Unlock,
+    Image as ImageIcon,
+    Camera,
+    Stamp,
+    Hash,
+    Pencil
+} from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -7,8 +24,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 const tools = [
     { name: 'Merge PDF', path: '/', icon: FileStack, description: 'Combine multiple PDFs into one' },
     { name: 'Split PDF', path: '/split', icon: Scissors, description: 'Extract pages or split documents' },
-    { name: 'Sign PDF', path: '/sign', icon: PenLine, description: 'Add signatures to your documents' },
+    { name: 'Rotate PDF', path: '/rotate', icon: RotateCw, description: 'Rotate pages 90, 180 or 270 degrees' },
+    { name: 'Organize PDF', path: '/organize', icon: LayoutGrid, description: 'Rearrange, delete or move pages' },
     { name: 'Compress PDF', path: '/compress', icon: Minimize2, description: 'Reduce file size while maintaining quality' },
+    { name: 'Sign PDF', path: '/sign', icon: PenLine, description: 'Add signatures to your documents' },
+    { name: 'Protect PDF', path: '/protect', icon: Lock, description: 'Encrypt PDF with a password' },
+    { name: 'Unlock PDF', path: '/unlock', icon: Unlock, description: 'Remove password security' },
+    { name: 'JPG to PDF', path: '/jpg-to-pdf', icon: ImageIcon, description: 'Convert images to PDF' },
+    { name: 'Scan to PDF', path: '/scan', icon: Camera, description: 'Scan documents with camera' },
+    { name: 'Watermark', path: '/watermark', icon: Stamp, description: 'Add text watermarks' },
+    { name: 'Page Numbers', path: '/page-numbers', icon: Hash, description: 'Add page numbers' },
+    { name: 'Edit PDF', path: '/edit', icon: Pencil, description: 'Add text and images' },
 ];
 
 export function Layout() {
