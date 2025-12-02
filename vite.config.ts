@@ -26,6 +26,11 @@ export default defineConfig({
             type: 'image/png'
           }
         ]
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        // Explicitly exclude wasm from precache
+        globIgnores: ['**/*.wasm']
       }
     })
   ],

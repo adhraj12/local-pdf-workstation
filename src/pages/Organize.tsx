@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { DragAndDrop } from '../components/DragAndDrop';
-import { reorderPages } from '../utils/pdf';
-import { Loader2, Download, FileText, Trash2 } from 'lucide-react';
+import { organizePDF } from '../utils/pdf';
+import { Loader2, Download, FileText, Trash2, RotateCw } from 'lucide-react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, rectSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -18,10 +18,12 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 interface SortablePageProps {
     id: string;
     pageIndex: number;
+    rotation: number;
     onRemove: (index: number) => void;
+    onRotate: (index: number) => void;
 }
 
-function SortablePage({ id, pageIndex, onRemove }: SortablePageProps) {
+function SortablePage({ id, pageIndex, rotation, onRemove, onRotate }: SortablePageProps) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
 
     const style = {
@@ -37,6 +39,7 @@ function SortablePage({ id, pageIndex, onRemove }: SortablePageProps) {
                 <Page
                     pageNumber={pageIndex + 1}
                     width={150}
+                    rotate={rotation}
                     renderTextLayer={false}
                     renderAnnotationLayer={false}
                     className="pointer-events-none"
@@ -48,16 +51,25 @@ function SortablePage({ id, pageIndex, onRemove }: SortablePageProps) {
                 />
                 <div {...attributes} {...listeners} className="absolute inset-0 cursor-grab active:cursor-grabbing hover:bg-black/5 transition-colors" />
             </div>
-            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                <button
+                    onClick={() => onRotate(pageIndex)}
+                    className="p-1 bg-white text-gray-700 rounded shadow hover:bg-gray-50"
+                    title="Rotate 90° Left"
+                >
+                    <RotateCw className="w-4 h-4" />
+                </button>
                 <button
                     onClick={() => onRemove(pageIndex)}
                     className="p-1 bg-red-500 text-white rounded shadow hover:bg-red-600"
+                    title="Remove Page"
                 >
                     <Trash2 className="w-4 h-4" />
                 </button>
             </div>
-            <div className="mt-2 text-center text-xs font-medium text-gray-500">
-                Page {pageIndex + 1}
+            <div className="mt-2 text-center text-xs font-medium text-gray-500 flex justify-between px-2">
+                <span>Page {pageIndex + 1}</span>
+                {rotation !== 0 && <span className="text-indigo-600">{rotation}°</span>}
             </div>
         </div>
     );
@@ -66,7 +78,8 @@ function SortablePage({ id, pageIndex, onRemove }: SortablePageProps) {
 export function Organize() {
     const [file, setFile] = useState<File | null>(null);
     const [numPages, setNumPages] = useState<number>(0);
-    const [pageOrder, setPageOrder] = useState<number[]>([]);
+    // Store objects with original index and current rotation
+    const [pages, setPages] = useState<{ index: number; rotation: number }[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
 
     const sensors = useSensors(
@@ -84,23 +97,37 @@ export function Organize() {
 
     const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
         setNumPages(numPages);
-        setPageOrder(Array.from({ length: numPages }, (_, i) => i));
+        // Initialize pages with 0 rotation
+        setPages(Array.from({ length: numPages }, (_, i) => ({ index: i, rotation: 0 })));
     };
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
 
         if (over && active.id !== over.id) {
-            setPageOrder((items) => {
-                const oldIndex = items.indexOf(parseInt(active.id as string));
-                const newIndex = items.indexOf(parseInt(over.id as string));
+            setPages((items) => {
+                const oldIndex = items.findIndex(p => p.index === parseInt(active.id as string));
+                const newIndex = items.findIndex(p => p.index === parseInt(over.id as string));
                 return arrayMove(items, oldIndex, newIndex);
             });
         }
     };
 
-    const handleRemovePage = (indexToRemove: number) => {
-        setPageOrder(prev => prev.filter(p => p !== indexToRemove));
+    const handleRemovePage = (originalIndex: number) => {
+        setPages(prev => prev.filter(p => p.index !== originalIndex));
+    };
+
+    const handleRotatePage = (originalIndex: number) => {
+        setPages(prev => prev.map(p => {
+            if (p.index === originalIndex) {
+                // Rotate -90 degrees (left) on each click
+                // 0 -> -90 -> -180 -> -270 -> 0 (normalized to 0-360 for display if needed, but pdf-lib handles negative)
+                // Let's keep it simple: subtract 90
+                const newRotation = (p.rotation - 90) % 360;
+                return { ...p, rotation: newRotation };
+            }
+            return p;
+        }));
     };
 
     const handleSave = async () => {
@@ -108,8 +135,7 @@ export function Organize() {
 
         try {
             setIsProcessing(true);
-            // pageOrder contains the original indices in the new order
-            const reorderedPdfBytes = await reorderPages(file, pageOrder);
+            const reorderedPdfBytes = await organizePDF(file, pages);
 
             const blob = new Blob([reorderedPdfBytes as any], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
@@ -171,16 +197,18 @@ export function Organize() {
                                     onDragEnd={handleDragEnd}
                                 >
                                     <SortableContext
-                                        items={pageOrder.map(String)}
+                                        items={pages.map(p => String(p.index))}
                                         strategy={rectSortingStrategy}
                                     >
                                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                                            {pageOrder.map((originalIndex) => (
+                                            {pages.map((page) => (
                                                 <SortablePage
-                                                    key={originalIndex}
-                                                    id={String(originalIndex)}
-                                                    pageIndex={originalIndex}
-                                                    onRemove={() => handleRemovePage(originalIndex)}
+                                                    key={page.index}
+                                                    id={String(page.index)}
+                                                    pageIndex={page.index}
+                                                    rotation={page.rotation}
+                                                    onRemove={() => handleRemovePage(page.index)}
+                                                    onRotate={() => handleRotatePage(page.index)}
                                                 />
                                             ))}
                                         </div>

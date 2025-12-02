@@ -1,37 +1,104 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Suspense, lazy } from 'react';
 import { Layout } from './components/Layout';
-import { Merge } from './pages/Merge';
-import { Split } from './pages/Split';
-import { Sign } from './pages/Sign';
-import { Compress } from './pages/Compress';
-import { Rotate } from './pages/Rotate';
-import { Organize } from './pages/Organize';
-import { Protect } from './pages/Protect';
-import { Unlock } from './pages/Unlock';
-import { JpgToPdf } from './pages/JpgToPdf';
-import { Scan } from './pages/Scan';
-import { Watermark } from './pages/Watermark';
-import { PageNumbers } from './pages/PageNumbers';
-import { Edit } from './pages/Edit';
+import { Loader2 } from 'lucide-react';
+
+// Lazy load pages
+const Merge = lazy(() => import('./pages/Merge').then(module => ({ default: module.Merge })));
+const Split = lazy(() => import('./pages/Split').then(module => ({ default: module.Split })));
+const Sign = lazy(() => import('./pages/Sign').then(module => ({ default: module.Sign })));
+const Compress = lazy(() => import('./pages/Compress').then(module => ({ default: module.Compress })));
+const Rotate = lazy(() => import('./pages/Rotate').then(module => ({ default: module.Rotate })));
+const Organize = lazy(() => import('./pages/Organize').then(module => ({ default: module.Organize })));
+const Protect = lazy(() => import('./pages/Protect').then(module => ({ default: module.Protect })));
+const Unlock = lazy(() => import('./pages/Unlock').then(module => ({ default: module.Unlock })));
+const JpgToPdf = lazy(() => import('./pages/JpgToPdf').then(module => ({ default: module.JpgToPdf })));
+const Scan = lazy(() => import('./pages/Scan').then(module => ({ default: module.Scan })));
+const Watermark = lazy(() => import('./pages/Watermark').then(module => ({ default: module.Watermark })));
+const PageNumbers = lazy(() => import('./pages/PageNumbers').then(module => ({ default: module.PageNumbers })));
+const Edit = lazy(() => import('./pages/Edit').then(module => ({ default: module.Edit })));
+
+function LoadingFallback() {
+  return (
+    <div className="flex items-center justify-center h-full min-h-[400px]">
+      <div className="text-center text-gray-500">
+        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
+        <p>Loading...</p>
+      </div>
+    </div>
+  );
+}
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
-          <Route index element={<Merge />} />
-          <Route path="split" element={<Split />} />
-          <Route path="sign" element={<Sign />} />
-          <Route path="compress" element={<Compress />} />
-          <Route path="rotate" element={<Rotate />} />
-          <Route path="organize" element={<Organize />} />
-          <Route path="protect" element={<Protect />} />
-          <Route path="unlock" element={<Unlock />} />
-          <Route path="jpg-to-pdf" element={<JpgToPdf />} />
-          <Route path="scan" element={<Scan />} />
-          <Route path="watermark" element={<Watermark />} />
-          <Route path="page-numbers" element={<PageNumbers />} />
-          <Route path="edit" element={<Edit />} />
+          <Route index element={
+            <Suspense fallback={<LoadingFallback />}>
+              <Merge />
+            </Suspense>
+          } />
+          <Route path="split" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <Split />
+            </Suspense>
+          } />
+          <Route path="sign" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <Sign />
+            </Suspense>
+          } />
+          <Route path="compress" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <Compress />
+            </Suspense>
+          } />
+          <Route path="rotate" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <Rotate />
+            </Suspense>
+          } />
+          <Route path="organize" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <Organize />
+            </Suspense>
+          } />
+          <Route path="protect" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <Protect />
+            </Suspense>
+          } />
+          <Route path="unlock" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <Unlock />
+            </Suspense>
+          } />
+          <Route path="jpg-to-pdf" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <JpgToPdf />
+            </Suspense>
+          } />
+          <Route path="scan" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <Scan />
+            </Suspense>
+          } />
+          <Route path="watermark" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <Watermark />
+            </Suspense>
+          } />
+          <Route path="page-numbers" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <PageNumbers />
+            </Suspense>
+          } />
+          <Route path="edit" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <Edit />
+            </Suspense>
+          } />
         </Route>
       </Routes>
     </BrowserRouter>

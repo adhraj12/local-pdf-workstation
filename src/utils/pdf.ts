@@ -1,6 +1,5 @@
 import { PDFDocument, degrees, rgb, StandardFonts } from 'pdf-lib';
-// @ts-ignore
-import qpdf from '@neslinesli93/qpdf-wasm';
+
 
 export async function mergePDFs(files: File[]): Promise<Uint8Array> {
     const mergedPdf = await PDFDocument.create();
@@ -79,13 +78,27 @@ export async function rotatePDF(file: File, rotation: 90 | 180 | 270, pageIndice
     return await pdfDoc.save();
 }
 
-export async function reorderPages(file: File, order: number[]): Promise<Uint8Array> {
+export async function organizePDF(
+    file: File,
+    pages: { index: number; rotation: number }[]
+): Promise<Uint8Array> {
     const arrayBuffer = await file.arrayBuffer();
     const srcPdf = await PDFDocument.load(arrayBuffer);
     const newPdf = await PDFDocument.create();
 
-    const copiedPages = await newPdf.copyPages(srcPdf, order);
-    copiedPages.forEach((page) => newPdf.addPage(page));
+    // Copy pages based on the new order
+    const indices = pages.map(p => p.index);
+    const copiedPages = await newPdf.copyPages(srcPdf, indices);
+
+    // Add pages and apply rotation
+    copiedPages.forEach((page, i) => {
+        const rotation = pages[i].rotation;
+        if (rotation !== 0) {
+            const currentRotation = page.getRotation().angle;
+            page.setRotation(degrees(currentRotation + rotation));
+        }
+        newPdf.addPage(page);
+    });
 
     return await newPdf.save();
 }
@@ -165,6 +178,10 @@ export async function encryptPDF(file: File, password: string): Promise<Uint8Arr
     const inputData = new Uint8Array(arrayBuffer);
 
     try {
+        // @ts-ignore
+        const qpdfModule = await import('@neslinesli93/qpdf-wasm');
+        const qpdf = qpdfModule.default;
+
         const instance = await qpdf({
             locateFile: () => '/qpdf.wasm'
         }) as any;
