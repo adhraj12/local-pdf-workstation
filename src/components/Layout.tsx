@@ -22,7 +22,7 @@ import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const tools = [
-    { name: 'Merge PDF', path: '/', icon: FileStack, description: 'Combine multiple PDFs into one' },
+    { name: 'Merge PDF', path: '/merge', icon: FileStack, description: 'Combine multiple PDFs into one' },
     { name: 'Split PDF', path: '/split', icon: Scissors, description: 'Extract pages or split documents' },
     { name: 'Rotate PDF', path: '/rotate', icon: RotateCw, description: 'Rotate pages 90, 180 or 270 degrees' },
     { name: 'Organize PDF', path: '/organize', icon: LayoutGrid, description: 'Rearrange, delete or move pages' },

@@ -17,6 +17,7 @@ const Scan = lazy(() => import('./pages/Scan').then(module => ({ default: module
 const Watermark = lazy(() => import('./pages/Watermark').then(module => ({ default: module.Watermark })));
 const PageNumbers = lazy(() => import('./pages/PageNumbers').then(module => ({ default: module.PageNumbers })));
 const Edit = lazy(() => import('./pages/Edit').then(module => ({ default: module.Edit })));
+const Landing = lazy(() => import('./pages/Landing').then(module => ({ default: module.Landing })));
 
 function LoadingFallback() {
   return (
@@ -33,8 +34,13 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={
+        <Route path="/" element={
+          <Suspense fallback={<LoadingFallback />}>
+            <Landing />
+          </Suspense>
+        } />
+        <Route element={<Layout />}>
+          <Route path="merge" element={
             <Suspense fallback={<LoadingFallback />}>
               <Merge />
             </Suspense>
