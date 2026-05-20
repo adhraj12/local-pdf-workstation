@@ -23,14 +23,15 @@ export function Landing() {
   const [modalContent, setModalContent] = useState<{ title: string; type: string } | null>(null);
 
   const handleExplore = (toolType: string) => {
-    if (toolType === 'pdf') {
-      navigate('/merge');
-    } else {
-      setModalContent({
-        title: toolType.charAt(0).toUpperCase() + toolType.slice(1) + ' Tools',
-        type: toolType
-      });
-    }
+    const categoryMap: { [key: string]: string } = {
+      pdf: 'pdf',
+      image: 'image',
+      text: 'text',
+      developer: 'developer',
+      more: 'other'
+    };
+    const mapped = categoryMap[toolType] || 'all';
+    navigate(`/tools?category=${mapped}`);
   };
 
   const features = [
@@ -144,38 +145,41 @@ export function Landing() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#fafbff] overflow-hidden">
-      {/* Top Left Organic Background Wave/Curve */}
-      <div className="absolute top-0 left-0 w-[480px] h-[580px] pointer-events-none -z-10 overflow-hidden">
-        <svg className="w-full h-full" viewBox="0 0 480 580" fill="none">
-          {/* Background solid soft blue wave */}
-          <path
-            d="M 0 0 
-               H 380 
-               C 380 130, 270 170, 230 230 
-               C 180 300, 250 390, 190 470 
-               C 150 520, 80 550, 0 570 
-               Z" 
-            fill="#f3f8fe" 
-          />
-          {/* Wavy blue outline path running along the edge */}
-          <path
-            d="M 380 0 
-               C 380 130, 270 170, 230 230 
-               C 180 300, 250 390, 190 470 
-               C 150 520, 80 550, 0 570" 
-            stroke="#d6e6f9" 
-            strokeWidth="2"
-            strokeLinecap="round"
-            fill="none"
-          />
-        </svg>
-      </div>
+    <div className="relative min-h-screen bg-[#fafbff]">
+      {/* Background Blobs Container - clips all background shape overflows perfectly without affecting page scrolling */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+        {/* Top Left Organic Background Wave/Curve */}
+        <div className="absolute top-0 left-0 w-[480px] h-[580px] overflow-hidden">
+          <svg className="w-full h-full" viewBox="0 0 480 580" fill="none">
+            {/* Background solid soft blue wave */}
+            <path
+              d="M 0 0 
+                 H 380 
+                 C 380 130, 270 170, 230 230 
+                 C 180 300, 250 390, 190 470 
+                 C 150 520, 80 550, 0 570 
+                 Z" 
+              fill="#f3f8fe" 
+            />
+            {/* Wavy blue outline path running along the edge */}
+            <path
+              d="M 380 0 
+                 C 380 130, 270 170, 230 230 
+                 C 180 300, 250 390, 190 470 
+                 C 150 520, 80 550, 0 570" 
+              stroke="#d6e6f9" 
+              strokeWidth="2"
+              strokeLinecap="round"
+              fill="none"
+            />
+          </svg>
+        </div>
 
-      {/* Other background glow elements */}
-      <div className="absolute top-[30%] right-[-10%] w-[60%] h-[50%] bg-blob-purple blur-[120px] pointer-events-none -z-10" />
-      <div className="absolute bottom-[10%] left-[5%] w-[45%] h-[40%] bg-blob-green blur-[90px] pointer-events-none -z-10" />
-      <div className="absolute bottom-[-10%] right-[10%] w-[50%] h-[45%] bg-blob-yellow blur-[100px] pointer-events-none -z-10" />
+        {/* Other background glow elements */}
+        <div className="absolute top-[30%] right-[-10%] w-[60%] h-[50%] bg-blob-purple blur-[120px]" />
+        <div className="absolute bottom-[10%] left-[5%] w-[45%] h-[40%] bg-blob-green blur-[90px]" />
+        <div className="absolute bottom-[-10%] right-[10%] w-[50%] h-[45%] bg-blob-yellow blur-[100px]" />
+      </div>
 
       {/* Header */}
       <header className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between relative z-20">
@@ -491,7 +495,7 @@ export function Landing() {
           </div>
 
           <button
-            onClick={() => navigate('/merge')}
+            onClick={() => navigate('/tools')}
             className="w-full sm:w-auto px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-sm shadow-lg shadow-blue-500/25 hover:shadow-blue-500/35 transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5 duration-200"
           >
             Browse All Tools <ArrowRight className="w-4 h-4" />
@@ -591,7 +595,7 @@ export function Landing() {
                     <p>All upcoming tools will adhere to our strict standard of <strong>100% private, offline, client-side execution</strong> with zero server payloads.</p>
                     <div className="pt-2">
                       <button
-                        onClick={() => navigate('/merge')}
+                        onClick={() => navigate('/tools?category=pdf')}
                         className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all text-xs flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/10"
                       >
                         Try PDF Tools Now <ArrowRight className="w-3.5 h-3.5" />

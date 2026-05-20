@@ -15,8 +15,10 @@
     "@neslinesli93/qpdf-wasm": "^0.3.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.24",
+    "jsqr": "^1.4.0",
     "lucide-react": "^0.554.0",
     "pdf-lib": "^1.17.1",
+    "qrcode": "^1.5.4",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-dropzone": "^14.3.8",
@@ -30,6 +32,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@types/node": "^24.10.1",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@types/react-pdf": "^6.2.0",

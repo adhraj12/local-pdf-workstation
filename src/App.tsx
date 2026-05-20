@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 import { Layout } from './components/Layout';
+import { ImageLayout } from './components/ImageLayout';
 import { Loader2 } from 'lucide-react';
 
 // Lazy load pages
@@ -18,6 +19,19 @@ const Watermark = lazy(() => import('./pages/Watermark').then(module => ({ defau
 const PageNumbers = lazy(() => import('./pages/PageNumbers').then(module => ({ default: module.PageNumbers })));
 const Edit = lazy(() => import('./pages/Edit').then(module => ({ default: module.Edit })));
 const Landing = lazy(() => import('./pages/Landing').then(module => ({ default: module.Landing })));
+const Tools = lazy(() => import('./pages/Tools').then(module => ({ default: module.Tools })));
+const CropRotate = lazy(() => import('./pages/CropRotate').then(module => ({ default: module.CropRotate })));
+const ImageConverter = lazy(() => import('./pages/ImageConverter').then(module => ({ default: module.ImageConverter })));
+const ImageCompress = lazy(() => import('./pages/ImageCompress').then(module => ({ default: module.ImageCompress })));
+const ImageResizer = lazy(() => import('./pages/ImageResizer').then(module => ({ default: module.ImageResizer })));
+const ExifEditor = lazy(() => import('./pages/ExifEditor').then(module => ({ default: module.ExifEditor })));
+const ImageWatermark = lazy(() => import('./pages/ImageWatermark').then(module => ({ default: module.ImageWatermark })));
+const MemeGenerator = lazy(() => import('./pages/MemeGenerator').then(module => ({ default: module.MemeGenerator })));
+const Steganography = lazy(() => import('./pages/Steganography').then(module => ({ default: module.Steganography })));
+const ColorPalette = lazy(() => import('./pages/ColorPalette').then(module => ({ default: module.ColorPalette })));
+const FaviconGenerator = lazy(() => import('./pages/FaviconGenerator').then(module => ({ default: module.FaviconGenerator })));
+const QrGenerator = lazy(() => import('./pages/QrGenerator').then(module => ({ default: module.QrGenerator })));
+const QrScanner = lazy(() => import('./pages/QrScanner').then(module => ({ default: module.QrScanner })));
 
 function LoadingFallback() {
   return (
@@ -37,6 +51,11 @@ function App() {
         <Route path="/" element={
           <Suspense fallback={<LoadingFallback />}>
             <Landing />
+          </Suspense>
+        } />
+        <Route path="tools" element={
+          <Suspense fallback={<LoadingFallback />}>
+            <Tools />
           </Suspense>
         } />
         <Route element={<Layout />}>
@@ -103,6 +122,68 @@ function App() {
           <Route path="edit" element={
             <Suspense fallback={<LoadingFallback />}>
               <Edit />
+            </Suspense>
+          } />
+        </Route>
+        <Route element={<ImageLayout />}>
+          <Route path="crop-image" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <CropRotate />
+            </Suspense>
+          } />
+          <Route path="convert-image" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <ImageConverter />
+            </Suspense>
+          } />
+          <Route path="compress-image" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <ImageCompress />
+            </Suspense>
+          } />
+          <Route path="resize-image" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <ImageResizer />
+            </Suspense>
+          } />
+          <Route path="exif-editor" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <ExifEditor />
+            </Suspense>
+          } />
+          <Route path="watermark-image" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <ImageWatermark />
+            </Suspense>
+          } />
+          <Route path="meme-generator" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <MemeGenerator />
+            </Suspense>
+          } />
+          <Route path="steganography" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <Steganography />
+            </Suspense>
+          } />
+          <Route path="color-palette" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <ColorPalette />
+            </Suspense>
+          } />
+          <Route path="favicon-generator" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <FaviconGenerator />
+            </Suspense>
+          } />
+          <Route path="qr-generator" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <QrGenerator />
+            </Suspense>
+          } />
+          <Route path="qr-scanner" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <QrScanner />
             </Suspense>
           } />
         </Route>

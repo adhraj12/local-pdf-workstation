@@ -6,9 +6,10 @@ interface DragAndDropProps {
     onDrop: (files: File[]) => void;
     accept?: Record<string, string[]>;
     className?: string;
+    subtext?: string;
 }
 
-export function DragAndDrop({ onDrop, accept = { 'application/pdf': ['.pdf'] }, className }: DragAndDropProps) {
+export function DragAndDrop({ onDrop, accept = { 'application/pdf': ['.pdf'] }, className, subtext = "PDF files only" }: DragAndDropProps) {
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
         accept,
@@ -38,7 +39,7 @@ export function DragAndDrop({ onDrop, accept = { 'application/pdf': ['.pdf'] }, 
                         {isDragActive ? "Drop files here..." : "Click to upload or drag and drop"}
                     </p>
                     <p className="text-sm text-gray-500 mt-1">
-                        PDF files only
+                        {subtext}
                     </p>
                 </div>
             </div>
