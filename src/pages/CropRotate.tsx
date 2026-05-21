@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Loader2, ArrowLeft, Download, RotateCw, RotateCcw, FlipHorizontal, FlipVertical } from 'lucide-react';
 import { DragAndDrop } from '../components/DragAndDrop';
 import { cn } from '../lib/utils';
@@ -9,6 +10,7 @@ interface ImageDimensions {
 }
 
 export function CropRotate() {
+  const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [imageElement, setImageElement] = useState<HTMLImageElement | null>(null);
@@ -22,8 +24,9 @@ export function CropRotate() {
 
   // Crop states (in percentage of display bounds)
   const [crop, setCrop] = useState({ x: 10, y: 10, w: 80, h: 80 });
-  const [aspectRatio, setAspectRatio] = useState<string>('free');
+  const [aspectRatio, setAspectRatio] = useState<string>('none');
   
+
   // Drag / Resize state trackers
   const [isDragging, setIsDragging] = useState(false);
   const [activeHandle, setActiveHandle] = useState<string | null>(null);
@@ -57,7 +60,7 @@ export function CropRotate() {
           setFineRotation(0);
           setFlipH(false);
           setFlipV(false);
-          setAspectRatio('free');
+          setAspectRatio('none');
           setCrop({ x: 10, y: 10, w: 80, h: 80 });
         };
         img.src = src;
@@ -113,6 +116,7 @@ export function CropRotate() {
     ctx.restore();
   }, [imageElement, rotation, fineRotation, flipH, flipV]);
 
+
   // Adjust crop box size centered to match current ratio
   useEffect(() => {
     resetCropBox(aspectRatio);
@@ -121,12 +125,15 @@ export function CropRotate() {
   const getRatioValue = (ratio: string) => {
     if (ratio === '1:1') return 1;
     if (ratio === '16:9') return 16 / 9;
+    if (ratio === '9:16') return 9 / 16;
     if (ratio === '4:3') return 4 / 3;
+    if (ratio === '3:2') return 3 / 2;
     if (ratio === '2:3') return 2 / 3;
     return 1;
   };
 
   const resetCropBox = (ratio = aspectRatio) => {
+    if (ratio === 'none') return;
     const canvas = previewCanvasRef.current;
     if (!canvas) return;
 
@@ -156,6 +163,7 @@ export function CropRotate() {
   // Mouse drag crop overlay handlers
   const handleMouseDown = (e: React.MouseEvent, handle: string | null = null) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragging(true);
     setActiveHandle(handle);
     
@@ -201,56 +209,110 @@ export function CropRotate() {
         setCrop(prev => ({ ...prev, x: newX, y: newY }));
       } else {
         // Resize crop box
-        let newX = dragStart.cropX;
-        let newY = dragStart.cropY;
-        let newW = dragStart.cropW;
-        let newH = dragStart.cropH;
+        const x1 = dragStart.cropX;
+        const y1 = dragStart.cropY;
+        const x2 = dragStart.cropX + dragStart.cropW;
+        const y2 = dragStart.cropY + dragStart.cropH;
 
-        if (activeHandle.includes('e')) {
-          newW = Math.max(10, Math.min(100 - newX, dragStart.cropW + deltaX));
-        }
-        if (activeHandle.includes('w')) {
-          const potentialW = dragStart.cropW - deltaX;
-          if (potentialW >= 10) {
-            newX = Math.max(0, dragStart.cropX + deltaX);
-            newW = dragStart.cropW + (dragStart.cropX - newX);
-          }
-        }
-        if (activeHandle.includes('s')) {
-          newH = Math.max(10, Math.min(100 - newY, dragStart.cropH + deltaY));
-        }
-        if (activeHandle.includes('n')) {
-          const potentialH = dragStart.cropH - deltaY;
-          if (potentialH >= 10) {
-            newY = Math.max(0, dragStart.cropY + deltaY);
-            newH = dragStart.cropH + (dragStart.cropY - newY);
-          }
-        }
+        let newX1 = x1;
+        let newY1 = y1;
+        let newX2 = x2;
+        let newY2 = y2;
 
-        // Maintain Aspect Ratio locks
-        if (aspectRatio !== 'free') {
+        if (aspectRatio === 'free') {
+          if (activeHandle.includes('w')) {
+            newX1 = Math.max(0, Math.min(x2 - 10, x1 + deltaX));
+          }
+          if (activeHandle.includes('e')) {
+            newX2 = Math.max(x1 + 10, Math.min(100, x2 + deltaX));
+          }
+          if (activeHandle.includes('n')) {
+            newY1 = Math.max(0, Math.min(y2 - 10, y1 + deltaY));
+          }
+          if (activeHandle.includes('s')) {
+            newY2 = Math.max(y1 + 10, Math.min(100, y2 + deltaY));
+          }
+        } else {
+          // Locked aspect ratio
           const targetRatio = getRatioValue(aspectRatio);
           const canvas = previewCanvasRef.current;
           if (canvas) {
             const canvasRatio = canvas.width / canvas.height;
-            
-            if (activeHandle.includes('e') || activeHandle.includes('w')) {
-              newH = (newW * canvasRatio) / targetRatio;
-              if (newY + newH > 100) {
-                newH = 100 - newY;
-                newW = (newH * targetRatio) / canvasRatio;
-              }
-            } else {
-              newW = (newH * targetRatio) / canvasRatio;
-              if (newX + newW > 100) {
-                newW = 100 - newX;
-                newH = (newW * canvasRatio) / targetRatio;
-              }
+            const r = targetRatio / canvasRatio; // w = h * r
+
+            const minW = Math.max(10, 10 * r);
+            const minH = Math.max(10, 10 / r);
+
+            if (activeHandle === 'se') {
+              const maxW = Math.min(100 - x1, (100 - y1) * r);
+              const newW = Math.max(minW, Math.min(maxW, dragStart.cropW + deltaX));
+              const newH = newW / r;
+              newX2 = x1 + newW;
+              newY2 = y1 + newH;
+            } else if (activeHandle === 'nw') {
+              const maxW = Math.min(x2, y2 * r);
+              const newW = Math.max(minW, Math.min(maxW, dragStart.cropW - deltaX));
+              const newH = newW / r;
+              newX1 = x2 - newW;
+              newY1 = y2 - newH;
+            } else if (activeHandle === 'ne') {
+              const maxW = Math.min(100 - x1, y2 * r);
+              const newW = Math.max(minW, Math.min(maxW, dragStart.cropW + deltaX));
+              const newH = newW / r;
+              newX2 = x1 + newW;
+              newY1 = y2 - newH;
+            } else if (activeHandle === 'sw') {
+              const maxW = Math.min(x2, (100 - y1) * r);
+              const newW = Math.max(minW, Math.min(maxW, dragStart.cropW - deltaX));
+              const newH = newW / r;
+              newX1 = x2 - newW;
+              newY2 = y1 + newH;
+            } else if (activeHandle === 'e') {
+              const centerY = y1 + dragStart.cropH / 2;
+              const maxH = Math.min(2 * centerY, 2 * (100 - centerY));
+              const maxW = Math.min(100 - x1, maxH * r);
+              const newW = Math.max(minW, Math.min(maxW, dragStart.cropW + deltaX));
+              const newH = newW / r;
+              newX2 = x1 + newW;
+              newY1 = centerY - newH / 2;
+              newY2 = centerY + newH / 2;
+            } else if (activeHandle === 'w') {
+              const centerY = y1 + dragStart.cropH / 2;
+              const maxH = Math.min(2 * centerY, 2 * (100 - centerY));
+              const maxW = Math.min(x2, maxH * r);
+              const newW = Math.max(minW, Math.min(maxW, dragStart.cropW - deltaX));
+              const newH = newW / r;
+              newX1 = x2 - newW;
+              newY1 = centerY - newH / 2;
+              newY2 = centerY + newH / 2;
+            } else if (activeHandle === 's') {
+              const centerX = x1 + dragStart.cropW / 2;
+              const maxW = Math.min(2 * centerX, 2 * (100 - centerX));
+              const maxH = Math.min(100 - y1, maxW / r);
+              const newH = Math.max(minH, Math.min(maxH, dragStart.cropH + deltaY));
+              const newW = newH * r;
+              newY2 = y1 + newH;
+              newX1 = centerX - newW / 2;
+              newX2 = centerX + newW / 2;
+            } else if (activeHandle === 'n') {
+              const centerX = x1 + dragStart.cropW / 2;
+              const maxW = Math.min(2 * centerX, 2 * (100 - centerX));
+              const maxH = Math.min(y2, maxW / r);
+              const newH = Math.max(minH, Math.min(maxH, dragStart.cropH - deltaY));
+              const newW = newH * r;
+              newY1 = y2 - newH;
+              newX1 = centerX - newW / 2;
+              newX2 = centerX + newW / 2;
             }
           }
         }
 
-        setCrop({ x: newX, y: newY, w: newW, h: newH });
+        setCrop({
+          x: newX1,
+          y: newY1,
+          w: newX2 - newX1,
+          h: newY2 - newY1
+        });
       }
     };
 
@@ -302,25 +364,30 @@ export function CropRotate() {
       fullCtx.drawImage(imageElement, -originalW / 2, -originalH / 2);
       fullCtx.restore();
 
-      // Crop canvas
-      const croppedCanvas = document.createElement('canvas');
-      const croppedCtx = croppedCanvas.getContext('2d');
-      if (!croppedCtx) throw new Error('Could not instantiate crop canvas');
+      let finalCanvas = fullCanvas;
 
-      // Convert percentage coordinates back to pixel bounds
-      const cropPxX = Math.round((crop.x / 100) * transW);
-      const cropPxY = Math.round((crop.y / 100) * transH);
-      const cropPxW = Math.round((crop.w / 100) * transW);
-      const cropPxH = Math.round((crop.h / 100) * transH);
+      if (aspectRatio !== 'none') {
+        // Crop canvas
+        const croppedCanvas = document.createElement('canvas');
+        const croppedCtx = croppedCanvas.getContext('2d');
+        if (!croppedCtx) throw new Error('Could not instantiate crop canvas');
 
-      croppedCanvas.width = cropPxW;
-      croppedCanvas.height = cropPxH;
+        // Convert percentage coordinates back to pixel bounds
+        const cropPxX = Math.round((crop.x / 100) * transW);
+        const cropPxY = Math.round((crop.y / 100) * transH);
+        const cropPxW = Math.round((crop.w / 100) * transW);
+        const cropPxH = Math.round((crop.h / 100) * transH);
 
-      croppedCtx.drawImage(
-        fullCanvas,
-        cropPxX, cropPxY, cropPxW, cropPxH, // source box
-        0, 0, cropPxW, cropPxH             // dest box
-      );
+        croppedCanvas.width = cropPxW;
+        croppedCanvas.height = cropPxH;
+
+        croppedCtx.drawImage(
+          fullCanvas,
+          cropPxX, cropPxY, cropPxW, cropPxH, // source box
+          0, 0, cropPxW, cropPxH             // dest box
+        );
+        finalCanvas = croppedCanvas;
+      }
 
       // Map formats
       let mimeType = file?.type || 'image/png';
@@ -333,10 +400,10 @@ export function CropRotate() {
       const lastDot = originalName.lastIndexOf('.');
       const baseName = lastDot !== -1 ? originalName.substring(0, lastDot) : originalName;
       const ext = mimeType.split('/')[1];
-      const exportName = `${baseName}-cropped.${ext}`;
+      const exportName = aspectRatio === 'none' ? `${baseName}-rotated.${ext}` : `${baseName}-cropped.${ext}`;
 
       // Convert to blob and download
-      croppedCanvas.toBlob((blob) => {
+      finalCanvas.toBlob((blob) => {
         if (!blob) throw new Error('Failed to generate image blob');
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -364,20 +431,27 @@ export function CropRotate() {
     });
   };
 
-  const hasChanges = rotation !== 0 || fineRotation !== 0 || flipH || flipV || crop.x !== 10 || crop.y !== 10 || crop.w !== 80 || crop.h !== 80;
+  const hasChanges = rotation !== 0 || fineRotation !== 0 || flipH || flipV || aspectRatio !== 'free' || crop.x !== 10 || crop.y !== 10 || crop.w !== 80 || crop.h !== 80;
 
   const handleReset = () => {
     setRotation(0);
     setFineRotation(0);
     setFlipH(false);
     setFlipV(false);
-    setAspectRatio('free');
+    setAspectRatio('none');
     setCrop({ x: 10, y: 10, w: 80, h: 80 });
   };
 
   if (!imageSrc) {
     return (
       <div className="space-y-6">
+        <div 
+          onClick={() => navigate('/tools?category=image')}
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-emerald-600 transition-colors cursor-pointer"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Back to Image Tools</span>
+        </div>
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Crop & Rotate Image</h1>
           <p className="text-gray-600 mt-2">Crop parts of your image, rotate, or flip them client-side. Your photo never leaves your machine.</p>
@@ -439,44 +513,55 @@ export function CropRotate() {
         {/* Left Side: Interactive Canvas Editor */}
         <div className="lg:col-span-8 bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-4">
           <div 
-            ref={containerRef} 
-            className="relative select-none max-h-[500px] min-h-[300px] flex items-center justify-center bg-slate-50 rounded-2xl overflow-hidden"
+            className="relative select-none max-h-[500px] min-h-[300px] flex items-center justify-center bg-slate-50 rounded-2xl overflow-hidden p-4"
           >
-            <canvas ref={previewCanvasRef} className="max-h-[500px] max-w-full object-contain shadow-sm rounded-lg" />
-            
-            {/* Cropper Box Overlay */}
+            {/* Display bounds size matched wrapper */}
             <div
-              style={{
-                position: 'absolute',
-                left: `${crop.x}%`,
-                top: `${crop.y}%`,
-                width: `${crop.w}%`,
-                height: `${crop.h}%`,
-                boxShadow: '0 0 0 9999px rgba(15, 23, 42, 0.65)',
-                border: '2px solid #3b82f6',
-                cursor: 'move'
-              }}
-              onMouseDown={(e) => handleMouseDown(e, null)}
+              ref={containerRef}
+              className="relative inline-block max-w-full max-h-[460px]"
             >
-              {/* Corner handles (8-point resize system) */}
-              <div className="absolute top-[-6px] left-[-6px] w-3.5 h-3.5 bg-blue-500 border-2 border-white rounded-full cursor-nwse-resize" onMouseDown={(e) => handleMouseDown(e, 'nw')} />
-              <div className="absolute top-[-6px] right-[-6px] w-3.5 h-3.5 bg-blue-500 border-2 border-white rounded-full cursor-nesw-resize" onMouseDown={(e) => handleMouseDown(e, 'ne')} />
-              <div className="absolute bottom-[-6px] left-[-6px] w-3.5 h-3.5 bg-blue-500 border-2 border-white rounded-full cursor-nesw-resize" onMouseDown={(e) => handleMouseDown(e, 'sw')} />
-              <div className="absolute bottom-[-6px] right-[-6px] w-3.5 h-3.5 bg-blue-500 border-2 border-white rounded-full cursor-nwse-resize" onMouseDown={(e) => handleMouseDown(e, 'se')} />
+              <canvas ref={previewCanvasRef} className="max-w-full max-h-[460px] block w-auto h-auto shadow-sm rounded-lg" />
               
-              <div className="absolute top-[-6px] left-[50%] transform translate-x-[-50%] w-3 h-3 bg-blue-500 border-2 border-white rounded-full cursor-ns-resize" onMouseDown={(e) => handleMouseDown(e, 'n')} />
-              <div className="absolute bottom-[-6px] left-[50%] transform translate-x-[-50%] w-3 h-3 bg-blue-500 border-2 border-white rounded-full cursor-ns-resize" onMouseDown={(e) => handleMouseDown(e, 's')} />
-              <div className="absolute left-[-6px] top-[50%] transform translate-y-[-50%] w-3 h-3 bg-blue-500 border-2 border-white rounded-full cursor-ew-resize" onMouseDown={(e) => handleMouseDown(e, 'w')} />
-              <div className="absolute right-[-6px] top-[50%] transform translate-y-[-50%] w-3 h-3 bg-blue-500 border-2 border-white rounded-full cursor-ew-resize" onMouseDown={(e) => handleMouseDown(e, 'e')} />
+              {/* Cropper Box Overlay */}
+              {aspectRatio !== 'none' && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: `${crop.x}%`,
+                    top: `${crop.y}%`,
+                    width: `${crop.w}%`,
+                    height: `${crop.h}%`,
+                    boxShadow: '0 0 0 9999px rgba(15, 23, 42, 0.65)',
+                    border: '2px solid #3b82f6',
+                    cursor: 'move'
+                  }}
+                  onMouseDown={(e) => handleMouseDown(e, null)}
+                >
+                  {/* Corner handles (8-point resize system) */}
+                  <div className="absolute top-[-6px] left-[-6px] w-3.5 h-3.5 bg-blue-500 border-2 border-white rounded-full cursor-nwse-resize" onMouseDown={(e) => handleMouseDown(e, 'nw')} />
+                  <div className="absolute top-[-6px] right-[-6px] w-3.5 h-3.5 bg-blue-500 border-2 border-white rounded-full cursor-nesw-resize" onMouseDown={(e) => handleMouseDown(e, 'ne')} />
+                  <div className="absolute bottom-[-6px] left-[-6px] w-3.5 h-3.5 bg-blue-500 border-2 border-white rounded-full cursor-nesw-resize" onMouseDown={(e) => handleMouseDown(e, 'sw')} />
+                  <div className="absolute bottom-[-6px] right-[-6px] w-3.5 h-3.5 bg-blue-500 border-2 border-white rounded-full cursor-nwse-resize" onMouseDown={(e) => handleMouseDown(e, 'se')} />
+                  
+                  <div className="absolute top-[-6px] left-[50%] transform translate-x-[-50%] w-3 h-3 bg-blue-500 border-2 border-white rounded-full cursor-ns-resize" onMouseDown={(e) => handleMouseDown(e, 'n')} />
+                  <div className="absolute bottom-[-6px] left-[50%] transform translate-x-[-50%] w-3 h-3 bg-blue-500 border-2 border-white rounded-full cursor-ns-resize" onMouseDown={(e) => handleMouseDown(e, 's')} />
+                  <div className="absolute left-[-6px] top-[50%] transform translate-y-[-50%] w-3 h-3 bg-blue-500 border-2 border-white rounded-full cursor-ew-resize" onMouseDown={(e) => handleMouseDown(e, 'w')} />
+                  <div className="absolute right-[-6px] top-[50%] transform translate-y-[-50%] w-3 h-3 bg-blue-500 border-2 border-white rounded-full cursor-ew-resize" onMouseDown={(e) => handleMouseDown(e, 'e')} />
 
-              {/* Grid guide lines */}
-              <div className="absolute left-[33.33%] top-0 bottom-0 w-[0.5px] border-l border-dashed border-white/40 pointer-events-none" />
-              <div className="absolute left-[66.66%] top-0 bottom-0 w-[0.5px] border-l border-dashed border-white/40 pointer-events-none" />
-              <div className="absolute top-[33.33%] left-0 right-0 h-[0.5px] border-t border-dashed border-white/40 pointer-events-none" />
-              <div className="absolute top-[66.66%] left-0 right-0 h-[0.5px] border-t border-dashed border-white/40 pointer-events-none" />
+                  {/* Grid guide lines */}
+                  <div className="absolute left-[33.33%] top-0 bottom-0 w-[0.5px] border-l border-dashed border-white/40 pointer-events-none" />
+                  <div className="absolute left-[66.66%] top-0 bottom-0 w-[0.5px] border-l border-dashed border-white/40 pointer-events-none" />
+                  <div className="absolute top-[33.33%] left-0 right-0 h-[0.5px] border-t border-dashed border-white/40 pointer-events-none" />
+                  <div className="absolute top-[66.66%] left-0 right-0 h-[0.5px] border-t border-dashed border-white/40 pointer-events-none" />
+                </div>
+              )}
             </div>
           </div>
-          <p className="text-[10px] text-center font-semibold text-slate-400">Drag corners to resize. Drag center to position the crop bounds.</p>
+          {aspectRatio !== 'none' && (
+            <p className="text-[10px] text-center font-semibold text-slate-400">
+              Drag corners to resize. Drag center to position the crop bounds.
+            </p>
+          )}
         </div>
 
         {/* Right Side: Editing Toolbars & Controls */}
@@ -484,19 +569,22 @@ export function CropRotate() {
           {/* Preset Aspect Ratios */}
           <div className="bg-white border border-slate-100 rounded-3xl p-5 shadow-sm space-y-4">
             <h3 className="text-xs font-bold text-slate-700 tracking-wide uppercase">Aspect Ratio</h3>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {[
+                { id: 'none', label: 'None' },
                 { id: 'free', label: 'Freeform' },
                 { id: '1:1', label: '1:1 Square' },
                 { id: '16:9', label: '16:9 Screen' },
+                { id: '9:16', label: '9:16 Story' },
                 { id: '4:3', label: '4:3 Standard' },
+                { id: '3:2', label: '3:2 Classic' },
                 { id: '2:3', label: '2:3 Portrait' }
               ].map((ratio) => (
                 <button
                   key={ratio.id}
                   onClick={() => setAspectRatio(ratio.id)}
                   className={cn(
-                    "py-2 rounded-xl text-[11px] font-extrabold border transition-all text-center",
+                    "py-2 px-1 rounded-xl text-[11px] font-extrabold border transition-all text-center",
                     aspectRatio === ratio.id
                       ? "bg-blue-50 border-blue-200 text-blue-600 shadow-sm"
                       : "border-slate-100 hover:border-slate-200 text-slate-500 hover:text-slate-800"
@@ -608,7 +696,7 @@ export function CropRotate() {
               ) : (
                 <>
                   <Download className="w-4 h-4" />
-                  Crop & Save Image
+                  {aspectRatio === 'none' ? 'Save Image' : 'Crop & Save Image'}
                 </>
               )}
             </button>

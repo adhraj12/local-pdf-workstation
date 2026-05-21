@@ -46,12 +46,15 @@ export function Layout() {
             {/* Sidebar */}
             <aside className="hidden md:flex flex-col w-72 bg-white border-r border-gray-200 h-screen sticky top-0 z-10 shadow-sm">
                 <div className="p-6 border-b border-gray-100">
-                    <div className="flex items-center gap-3 text-indigo-600">
+                    <Link to="/tools?category=pdf" className="flex items-center gap-3 text-indigo-600 hover:opacity-85 transition-all">
                         <div className="p-2.5 bg-indigo-50 rounded-xl">
                             <FileStack className="w-6 h-6" />
                         </div>
-                        <span className="font-bold text-xl tracking-tight">PDF Workstation</span>
-                    </div>
+                        <div>
+                            <span className="font-bold text-lg tracking-tight block">PDF Tools</span>
+                            <span className="text-[10px] text-slate-400 font-extrabold tracking-wider uppercase block mt-0.5">← Back to Dashboard</span>
+                        </div>
+                    </Link>
                 </div>
 
                 <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
@@ -61,6 +64,7 @@ export function Layout() {
                             <Link
                                 key={tool.path}
                                 to={tool.path}
+                                replace
                                 className={cn(
                                     "flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 group relative overflow-hidden",
                                     isActive
@@ -101,12 +105,15 @@ export function Layout() {
 
             {/* Mobile Header */}
             <div className="md:hidden bg-white border-b border-gray-200 p-4 flex items-center justify-between sticky top-0 z-30 shadow-sm">
-                <div className="flex items-center gap-2 text-indigo-600">
+                <Link to="/tools?category=pdf" className="flex items-center gap-2 text-indigo-600 hover:opacity-85 transition-all">
                     <div className="p-1.5 bg-indigo-50 rounded-lg">
                         <FileStack className="w-5 h-5" />
                     </div>
-                    <span className="font-bold text-lg">PDF Workstation</span>
-                </div>
+                    <div>
+                        <span className="font-bold text-sm block">PDF Tools</span>
+                        <span className="text-[9px] text-slate-400 font-extrabold tracking-wider uppercase block mt-0.5">← Exit to Dashboard</span>
+                    </div>
+                </Link>
                 <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
                     {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                 </button>
@@ -126,6 +133,7 @@ export function Layout() {
                                 <Link
                                     key={tool.path}
                                     to={tool.path}
+                                    replace
                                     onClick={() => setIsMobileMenuOpen(false)}
                                     className={cn(
                                         "flex items-center gap-4 px-4 py-4 rounded-xl transition-colors border border-transparent",
