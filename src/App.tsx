@@ -2,7 +2,15 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 import { Layout } from './components/Layout';
 import { ImageLayout } from './components/ImageLayout';
+import { TextLayout } from './components/TextLayout';
 import { Loader2 } from 'lucide-react';
+
+// Lazy load pages
+const TextFormatter = lazy(() => import('./pages/TextFormatter').then(module => ({ default: module.TextFormatter })));
+const TextDiff = lazy(() => import('./pages/TextDiff').then(module => ({ default: module.TextDiff })));
+const WordCounter = lazy(() => import('./pages/WordCounter').then(module => ({ default: module.WordCounter })));
+const JsonFormatter = lazy(() => import('./pages/JsonFormatter').then(module => ({ default: module.JsonFormatter })));
+const CryptoHash = lazy(() => import('./pages/CryptoHash').then(module => ({ default: module.CryptoHash })));
 
 // Lazy load pages
 const Merge = lazy(() => import('./pages/Merge').then(module => ({ default: module.Merge })));
@@ -184,6 +192,33 @@ function App() {
           <Route path="qr-scanner" element={
             <Suspense fallback={<LoadingFallback />}>
               <QrScanner />
+            </Suspense>
+          } />
+        </Route>
+        <Route element={<TextLayout />}>
+          <Route path="text-formatter" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <TextFormatter />
+            </Suspense>
+          } />
+          <Route path="text-diff" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <TextDiff />
+            </Suspense>
+          } />
+          <Route path="word-counter" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <WordCounter />
+            </Suspense>
+          } />
+          <Route path="json-formatter" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <JsonFormatter />
+            </Suspense>
+          } />
+          <Route path="crypto-hash" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <CryptoHash />
             </Suspense>
           } />
         </Route>

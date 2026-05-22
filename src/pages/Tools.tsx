@@ -36,7 +36,11 @@ import {
   FileImage,
   Scaling,
   QrCode,
-  Scan
+  Scan,
+  GitCompare,
+  BarChart3,
+  Braces,
+  Fingerprint
 } from 'lucide-react';
 
 const ALL_TOOLS_DATA = [
@@ -289,6 +293,56 @@ const ALL_TOOLS_DATA = [
     iconColor: 'text-emerald-500',
     bgColor: 'bg-emerald-50 border border-emerald-100',
     popular: false
+  },
+  {
+    name: 'Case & Formatter',
+    description: 'Convert text cases, sort lines, trim, prepend/append text.',
+    path: '/text-formatter',
+    icon: Type,
+    category: 'text',
+    iconColor: 'text-indigo-500',
+    bgColor: 'bg-indigo-50 border border-indigo-100',
+    popular: true
+  },
+  {
+    name: 'Text Diff Checker',
+    description: 'Compare two text blocks side-by-side and highlight differences.',
+    path: '/text-diff',
+    icon: GitCompare,
+    category: 'text',
+    iconColor: 'text-indigo-500',
+    bgColor: 'bg-indigo-50 border border-indigo-100',
+    popular: true
+  },
+  {
+    name: 'Word Counter & Stats',
+    description: 'Count characters, words, sentences, reading time, and density stats.',
+    path: '/word-counter',
+    icon: BarChart3,
+    category: 'text',
+    iconColor: 'text-indigo-500',
+    bgColor: 'bg-indigo-50 border border-indigo-100',
+    popular: false
+  },
+  {
+    name: 'JSON Formatter & Validator',
+    description: 'Beautify, minify, validate syntax, and explore JSON in a collapsible tree.',
+    path: '/json-formatter',
+    icon: Braces,
+    category: 'text',
+    iconColor: 'text-indigo-500',
+    bgColor: 'bg-indigo-50 border border-indigo-100',
+    popular: true
+  },
+  {
+    name: 'Crypto & Hash Generator',
+    description: 'Generate MD5/SHA hashes and encrypt/decrypt text using AES-256.',
+    path: '/crypto-hash',
+    icon: Fingerprint,
+    category: 'text',
+    iconColor: 'text-indigo-500',
+    bgColor: 'bg-indigo-50 border border-indigo-100',
+    popular: false
   }
 ];
 
@@ -379,13 +433,17 @@ export function Tools() {
     return ALL_TOOLS_DATA.filter(t => t.category === 'image').length;
   };
 
+  const getTextCount = () => {
+    return ALL_TOOLS_DATA.filter(t => t.category === 'text').length;
+  };
+
   const totalCount = ALL_TOOLS_DATA.length;
 
   const categoriesSidebar = [
     { id: 'all', name: 'All Tools', count: totalCount },
     { id: 'pdf', name: 'PDF Tools', count: getPdfCount() },
     { id: 'image', name: 'Image Tools', count: getImageCount() },
-    { id: 'text', name: 'Text Tools', count: 0 },
+    { id: 'text', name: 'Text Tools', count: getTextCount() },
     { id: 'developer', name: 'Developer Tools', count: 0 },
     { id: 'converter', name: 'Converter Tools', count: 0 },
     { id: 'security', name: 'Security Tools', count: 0 },
