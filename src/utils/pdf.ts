@@ -410,10 +410,7 @@ export async function organizePDF(
     // Add pages and apply rotation
     copiedPages.forEach((page, i) => {
         const rotation = pages[i].rotation;
-        if (rotation !== 0) {
-            const currentRotation = page.getRotation().angle;
-            page.setRotation(degrees(currentRotation + rotation));
-        }
+        page.setRotation(degrees(rotation));
         newPdf.addPage(page);
     });
 

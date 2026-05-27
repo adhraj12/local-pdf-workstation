@@ -95,10 +95,19 @@ export function Organize() {
         }
     };
 
-    const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-        setNumPages(numPages);
-        // Initialize pages with 0 rotation
-        setPages(Array.from({ length: numPages }, (_, i) => ({ index: i, rotation: 0 })));
+    const onDocumentLoadSuccess = async (pdf: any) => {
+        setNumPages(pdf.numPages);
+        
+        const initialPages = [];
+        for (let i = 1; i <= pdf.numPages; i++) {
+            try {
+                const page = await pdf.getPage(i);
+                initialPages.push({ index: i - 1, rotation: page.rotate || 0 });
+            } catch (e) {
+                initialPages.push({ index: i - 1, rotation: 0 });
+            }
+        }
+        setPages(initialPages);
     };
 
     const handleDragEnd = (event: DragEndEvent) => {
@@ -120,10 +129,8 @@ export function Organize() {
     const handleRotatePage = (originalIndex: number) => {
         setPages(prev => prev.map(p => {
             if (p.index === originalIndex) {
-                // Rotate -90 degrees (left) on each click
-                // 0 -> -90 -> -180 -> -270 -> 0 (normalized to 0-360 for display if needed, but pdf-lib handles negative)
-                // Let's keep it simple: subtract 90
-                const newRotation = (p.rotation - 90) % 360;
+                let newRotation = (p.rotation - 90) % 360;
+                if (newRotation < 0) newRotation += 360;
                 return { ...p, rotation: newRotation };
             }
             return p;
